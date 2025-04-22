@@ -1,0 +1,213 @@
+import { getApiKey } from './config';
+import { APIError, AuthError, safeExecute } from './errors';
+import {
+  MistralModel,
+  Message,
+  ChatCompletionResponse,
+  ChatCompletionOptions,
+  ResponseFormat,
+  SqlResponseOptions
+} from './types';
+
+/**
+ * Base API URLs
+ */
+const API_BASE_URL = "https://api.mistral.ai/v1";
+const CHAT_COMPLETIONS_URL = `${API_BASE_URL}/chat/completions`;
+
+/**
+ * Mistral API Client
+ */
+export class MistralApi {
+  private apiKey: string;
+
+  /**
+   * Creates a new Mistral API client instance
+   * @param apiKey - Optional API key (will use config if not provided)
+   */
+  constructor(apiKey?: string) {
+    this.apiKey = apiKey || getApiKey();
+  }
+
+  /**
+   * Create a chat completion
+   * @param options - Chat completion options
+   * @returns Chat completion response
+   */
+  async createChatCompletion(options: ChatCompletionOptions): Promise<ChatCompletionResponse> {
+    return safeExecute(async () => {
+      if (!this.apiKey) {
+        throw new AuthError();
+      }
+
+      const res = await fetch(CHAT_COMPLETIONS_URL, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(options)
+      });
+
+      if (!res.ok) {
+        throw new APIError(
+          `API request failed with status ${res.status}`,
+          res.status,
+          await res.text()
+        );
+      }
+
+      const json = await res.json();
+      
+      if (!json.choices || !json.choices.length) {
+        throw new APIError("Invalid API response: missing choices", res.status, json);
+      }
+      
+      return json as ChatCompletionResponse;
+    }, "Failed to get response from Mistral AI API");
+  }
+
+  /**
+   * Generate a text completion from a prompt
+   * @param prompt - The text prompt
+   * @param model - Mistral model to use
+   * @param options - Additional options
+   * @returns The generated text
+   */
+  async generateText(
+    prompt: string, 
+    model: MistralModel = "mistral-medium",
+    options: Partial<ChatCompletionOptions> = {}
+  ): Promise<string> {
+    const response = await this.createChatCompletion({
+      model,
+      messages: [{ role: "user", content: prompt }],
+      temperature: options.temperature ?? 0.7,
+      top_p: options.top_p,
+      max_tokens: options.max_tokens,
+      ...options
+    });
+    
+    return response.choices[0]?.message?.content?.trim() || "";
+  }
+
+  /**
+   * Generate a JSON response from a prompt
+   * @param prompt - The text prompt
+   * @param schema - Optional JSON schema object
+   * @param model - Mistral model to use
+   * @param options - Additional options
+   * @returns The parsed JSON object
+   */
+  async generateJson<T = any>(
+    prompt: string,
+    schema?: object,
+    model: MistralModel = "mistral-medium",
+    options: Partial<ChatCompletionOptions> = {}
+  ): Promise<T> {
+    let fullPrompt = prompt;
+    
+    if (schema) {
+      fullPrompt = `${prompt}\n\nPlease respond with a properly formatted JSON object that follows this schema: ${JSON.stringify(schema)}`;
+    } else {
+      fullPrompt = `${prompt}\n\nPlease respond with a valid, well-formatted JSON object only.`;
+    }
+    
+    const response = await this.createChatCompletion({
+      model,
+      messages: [{ role: "user", content: fullPrompt }],
+      temperature: options.temperature ?? 0.7,
+      response_format: {
+        type: ResponseFormat.JSON
+      },
+      ...options
+    });
+    
+    const content = response.choices[0]?.message?.content?.trim() || "{}";
+    
+    try {
+      return JSON.parse(content) as T;
+    } catch (error) {
+      // Extract JSON from the response if needed
+      const jsonMatch = content.match(/(\{.*\})/s);
+      if (jsonMatch && jsonMatch[0]) {
+        return JSON.parse(jsonMatch[0]) as T;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Generate an XML response from a prompt
+   * @param prompt - The text prompt
+   * @param model - Mistral model to use
+   * @param options - Additional options
+   * @returns The XML string
+   */
+  async generateXml(
+    prompt: string,
+    model: MistralModel = "mistral-medium",
+    options: Partial<ChatCompletionOptions> = {}
+  ): Promise<string> {
+    const fullPrompt = `${prompt}\n\nPlease respond with valid, well-formatted XML only.`;
+    
+    const response = await this.createChatCompletion({
+      model,
+      messages: [{ role: "user", content: fullPrompt }],
+      temperature: options.temperature ?? 0.7,
+      ...options
+    });
+    
+    return response.choices[0]?.message?.content?.trim() || "";
+  }
+
+  /**
+   * Generate a Markdown response from a prompt
+   * @param prompt - The text prompt
+   * @param model - Mistral model to use
+   * @param options - Additional options
+   * @returns The Markdown string
+   */
+  async generateMarkdown(
+    prompt: string,
+    model: MistralModel = "mistral-medium",
+    options: Partial<ChatCompletionOptions> = {}
+  ): Promise<string> {
+    const fullPrompt = `${prompt}\n\nPlease respond with properly formatted Markdown text only.`;
+    
+    const response = await this.createChatCompletion({
+      model,
+      messages: [{ role: "user", content: fullPrompt }],
+      temperature: options.temperature ?? 0.7,
+      ...options
+    });
+    
+    return response.choices[0]?.message?.content?.trim() || "";
+  }
+
+  /**
+   * Generate an SQL response from a prompt
+   * @param prompt - The text prompt
+   * @param dialect - SQL dialect (e.g., "MySQL", "PostgreSQL")
+   * @param model - Mistral model to use
+   * @param options - Additional options
+   * @returns The SQL string
+   */
+  async generateSql(
+    prompt: string,
+    dialect: string = "MySQL",
+    model: MistralModel = "mistral-medium",
+    options: Partial<ChatCompletionOptions> = {}
+  ): Promise<string> {
+    const fullPrompt = `${prompt}\n\nPlease respond with a valid, executable SQL query for ${dialect} database only.`;
+    
+    const response = await this.createChatCompletion({
+      model,
+      messages: [{ role: "user", content: fullPrompt }],
+      temperature: options.temperature ?? 0.7,
+      ...options
+    });
+    
+    return response.choices[0]?.message?.content?.trim() || "";
+  }
+} 
