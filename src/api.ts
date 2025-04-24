@@ -132,9 +132,6 @@ export class MistralApi implements IApiClient {
       model,
       messages: [{ role: "user", content: fullPrompt }],
       temperature: options.temperature ?? 0.7,
-      response_format: {
-        type: ResponseFormat.JSON
-      },
       ...options
     });
     
@@ -214,7 +211,7 @@ export class MistralApi implements IApiClient {
     model: MistralModel = "mistral-medium",
     options: Partial<ChatCompletionOptions> = {}
   ): Promise<string> {
-    const fullPrompt = `${prompt}\n\nPlease respond with a valid, executable SQL query for ${dialect} database only.`;
+    const fullPrompt = `${prompt}\n\nPlease respond with a valid, executable SQL query for ${dialect} database only, no code fences, no explanations.`;
     
     const response = await this.createChatCompletion({
       model,
