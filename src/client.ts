@@ -1,6 +1,7 @@
 import { MistralApi } from './api';
 import { MistralModel, ChatCompletionOptions } from './types';
 import { SQLDatabaseType } from './formatter/toSQL';
+import { getApiVersion } from './config';
 
 // Create a singleton instance of the API client
 let apiInstance: MistralApi | null = null;
@@ -16,11 +17,12 @@ export function getApi(): MistralApi {
 }
 
 /**
- * Set a new API key for the client
- * @param apiKey - The Mistral API key
+ * Set the API key for the client
+ * Used by config module
  */
 export function setApiKey(apiKey: string): void {
-  apiInstance = new MistralApi(apiKey);
+  // Create a new instance with the updated API key and current version
+  apiInstance = new MistralApi(apiKey, getApiVersion());
 }
 
 /**
@@ -62,15 +64,17 @@ export async function sendJsonPrompt<T>(
  * @param schema - Optional object schema
  * @param model - Mistral model to use
  * @param options - Additional options
+ * @param typeDefinition - Optional TypeScript type definition as a string
  * @returns The parsed JSON object
  */
 export async function sendJsonPromptWithSchema<T = any>(
   prompt: string,
   schema?: object,
   model: MistralModel = "mistral-medium",
-  options: Partial<ChatCompletionOptions> = {}
+  options: Partial<ChatCompletionOptions> = {},
+  typeDefinition?: string
 ): Promise<T> {
-  return getApi().generateJson<T>(prompt, schema, model, options);
+  return getApi().generateJson<T>(prompt, schema, model, options, typeDefinition);
 }
 
 /**

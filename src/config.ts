@@ -6,7 +6,8 @@ if (typeof window === 'undefined') {
 
 // In-memory configuration store
 let config = {
-  apiKey: ''
+  apiKey: '',
+  apiVersion: 'v1'
 };
 
 // Load environment variables
@@ -14,12 +15,12 @@ interface Env {
   MISTRAL_API_KEY: string;
 }
 
-// This import is deferred to avoid circular dependencies
+// Store for setApiKey client function
 let setApiKeyFn: ((key: string) => void) | null = null;
 
 /**
- * Set the function to update API key in the client
- * @internal Used by the internal API to avoid circular dependencies
+ * Set the client's setApiKey function
+ * This allows the config module to update the client when initialized
  */
 export function _setApiKeyFunction(fn: (key: string) => void): void {
   setApiKeyFn = fn;
@@ -28,9 +29,11 @@ export function _setApiKeyFunction(fn: (key: string) => void): void {
 /**
  * Initialize the library with configuration
  * @param apiKey - Mistral API key
+ * @param apiVersion - Mistral API version (default: 'v1')
  */
-export function init(apiKey: string): void {
+export function init(apiKey: string, apiVersion: string = 'v1'): void {
   config.apiKey = apiKey;
+  config.apiVersion = apiVersion;
   
   // If we have the client's setApiKey function, call it
   if (setApiKeyFn) {
@@ -51,6 +54,13 @@ export const getApiKey = (): string => {
   
   // Fallback to env var if no explicitly set key
   return typeof process !== 'undefined' && process.env.MISTRAL_API_KEY || '';
+};
+
+/**
+ * Get the current API version
+ */
+export const getApiVersion = (): string => {
+  return config.apiVersion;
 };
 
 // Function to safely access environment variables
