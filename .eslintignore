@@ -1,0 +1,17 @@
+# Build outputs
+dist/
+build/
+coverage/
+
+# Node modules
+node_modules/
+
+# Config files
+*.config.js
+jest.config.js
+
+# Test fixtures
+tests/fixtures/
+
+# Generated files
+*.d.ts 
