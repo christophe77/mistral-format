@@ -38,10 +38,8 @@ export interface ChatCompletionResponse {
 // Supported formats for responses
 export enum ResponseFormat {
   TEXT = "text",
-  JSON = "json",
-  XML = "xml",
-  MARKDOWN = "markdown",
-  SQL = "sql"
+  JSON_OBJECT = "json_object",
+  JSON_SCHEMA = "json_schema"
 }
 
 // Base options for API requests

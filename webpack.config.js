@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const dotenv = require('dotenv');
+const TerserPlugin = require('terser-webpack-plugin');
 
 // Load .env file
 const env = dotenv.config().parsed || {};
@@ -11,7 +12,8 @@ const envKeys = Object.keys(env).reduce((prev, next) => {
   return prev;
 }, {});
 
-module.exports = {
+// Common configuration 
+const commonConfig = {
   entry: './src/index.ts',
   mode: 'production',
   module: {
@@ -34,15 +36,6 @@ module.exports = {
       "stream": require.resolve("stream-browserify")
     }
   },
-  output: {
-    filename: 'index.js',
-    path: path.resolve(__dirname, 'dist'),
-    library: {
-      name: 'mistralConnector',
-      type: 'umd',
-    },
-    globalObject: 'this',
-  },
   plugins: [
     new webpack.DefinePlugin(envKeys),
     new webpack.ProvidePlugin({
@@ -50,4 +43,50 @@ module.exports = {
       process: 'process/browser',
     })
   ],
-}; 
+};
+
+// Create two configurations: one for the regular bundle and one for the minified version
+module.exports = [
+  // Regular bundle
+  {
+    ...commonConfig,
+    output: {
+      filename: 'index.js',
+      path: path.resolve(__dirname, 'dist'),
+      library: {
+        name: 'MistralFormat',
+        type: 'umd',
+        export: 'default',
+      },
+      globalObject: 'this',
+    },
+  },
+  // Minified bundle
+  {
+    ...commonConfig,
+    output: {
+      filename: 'mistral-format.min.js',
+      path: path.resolve(__dirname, 'dist'),
+      library: {
+        name: 'MistralFormat',
+        type: 'umd',
+        export: 'default',
+      },
+      globalObject: 'this',
+    },
+    optimization: {
+      minimize: true,
+      minimizer: [new TerserPlugin({
+        extractComments: false,
+        terserOptions: {
+          format: {
+            comments: false,
+          },
+          compress: {
+            drop_console: true,
+          },
+        },
+      })],
+    },
+  }
+]; 

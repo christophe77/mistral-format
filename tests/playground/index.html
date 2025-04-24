@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mistral Format - Playground</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <h1>Mistral Format - Playground</h1>
+  <p>This page demonstrates the formatters available in the Mistral Format library.</p>
+  
+  <div class="api-key-section">
+    <h2>API Key</h2>
+    <p>Enter your Mistral API key to test the formatters:</p>
+    <div class="controls">
+      <input type="password" id="api-key" placeholder="Enter your Mistral API key" style="width: 300px;">
+      <button id="init-button">Initialize</button>
+    </div>
+    <div id="api-status"></div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Text Prompt</h2>
+    <div class="controls">
+      <label for="text-prompt">Prompt:</label>
+      <textarea id="text-prompt">What is the capital of France?</textarea>
+    </div>
+    <div class="controls">
+      <label for="text-model">Model:</label>
+      <select id="text-model">
+        <option value="mistral-tiny">mistral-tiny</option>
+        <option value="mistral-small">mistral-small</option>
+        <option value="mistral-medium" selected>mistral-medium</option>
+        <option value="mistral-large">mistral-large</option>
+      </select>
+      <button id="text-options-toggle" class="toggle-options">Advanced Options</button>
+      <button id="text-button">Generate Text</button>
+    </div>
+    
+    <div id="text-advanced-options" class="advanced-options">
+      <div class="option-row">
+        <div class="option-group">
+          <label for="text-temperature">Temperature:</label>
+          <input type="number" id="text-temperature" min="0" max="1" step="0.1" value="0.7" class="number-input">
+        </div>
+        <div class="option-group">
+          <label for="text-top-p">Top P:</label>
+          <input type="number" id="text-top-p" min="0" max="1" step="0.1" value="1" class="number-input">
+        </div>
+        <div class="option-group">
+          <label for="text-max-tokens">Max Tokens:</label>
+          <input type="number" id="text-max-tokens" min="1" step="1" class="number-input">
+        </div>
+      </div>
+      <div class="option-row">
+        <div class="option-group checkbox-group">
+          <input type="checkbox" id="text-safe-mode">
+          <label for="text-safe-mode">Safe Mode</label>
+        </div>
+        <div class="option-group">
+          <label for="text-random-seed">Random Seed:</label>
+          <input type="number" id="text-random-seed" min="0" step="1" class="number-input">
+        </div>
+      </div>
+    </div>
+    
+    <div id="text-result" class="result-box">
+      <h3>Result:</h3>
+      <div id="text-output"></div>
+    </div>
+  </div>
+  
+  <div class="test-section">
+    <h2>Markdown Formatter</h2>
+    <div class="controls">
+      <label for="markdown-prompt">Prompt:</label>
+      <textarea id="markdown-prompt">Write a short guide about artificial intelligence</textarea>
+    </div>
+    <div class="controls">
+      <label for="markdown-model">Model:</label>
+      <select id="markdown-model">
+        <option value="mistral-tiny">mistral-tiny</option>
+        <option value="mistral-small">mistral-small</option>
+        <option value="mistral-medium" selected>mistral-medium</option>
+        <option value="mistral-large">mistral-large</option>
+      </select>
+      <button id="markdown-options-toggle" class="toggle-options">Advanced Options</button>
+      <button id="markdown-button">Generate Markdown</button>
+    </div>
+    
+    <div id="markdown-advanced-options" class="advanced-options">
+      <div class="option-row">
+        <div class="option-group">
+          <label for="markdown-temperature">Temperature:</label>
+          <input type="number" id="markdown-temperature" min="0" max="1" step="0.1" value="0.7" class="number-input">
+        </div>
+        <div class="option-group">
+          <label for="markdown-top-p">Top P:</label>
+          <input type="number" id="markdown-top-p" min="0" max="1" step="0.1" value="1" class="number-input">
+        </div>
+        <div class="option-group">
+          <label for="markdown-max-tokens">Max Tokens:</label>
+          <input type="number" id="markdown-max-tokens" min="1" step="1" class="number-input">
+        </div>
+      </div>
+      <div class="option-row">
+        <div class="option-group checkbox-group">
+          <input type="checkbox" id="markdown-safe-mode">
+          <label for="markdown-safe-mode">Safe Mode</label>
+        </div>
+        <div class="option-group">
+          <label for="markdown-random-seed">Random Seed:</label>
+          <input type="number" id="markdown-random-seed" min="0" step="1" class="number-input">
+        </div>
+      </div>
+    </div>
+    
+    <div id="markdown-result" class="result-box">
+      <h3>Raw Response:</h3>
+      <div id="markdown-raw" class="result-raw"></div>
+      <h3>Cleaned Response:</h3>
+      <div id="markdown-output" class="result-clean"></div>
+    </div>
+  </div>
+  
+  <div class="test-section">
+    <h2>XML Formatter</h2>
+    <div class="controls">
+      <label for="xml-prompt">Prompt:</label>
+      <textarea id="xml-prompt">List three programming languages and their key features</textarea>
+    </div>
+    <div class="controls">
+      <label for="xml-model">Model:</label>
+      <select id="xml-model">
+        <option value="mistral-tiny">mistral-tiny</option>
+        <option value="mistral-small" selected>mistral-small</option>
+        <option value="mistral-medium">mistral-medium</option>
+        <option value="mistral-large">mistral-large</option>
+      </select>
+      <button id="xml-options-toggle" class="toggle-options">Advanced Options</button>
+      <button id="xml-button">Generate XML</button>
+    </div>
+    
+    <div id="xml-advanced-options" class="advanced-options">
+      <div class="option-row">
+        <div class="option-group">
+          <label for="xml-temperature">Temperature:</label>
+          <input type="number" id="xml-temperature" min="0" max="1" step="0.1" value="0.7" class="number-input">
+        </div>
+        <div class="option-group">
+          <label for="xml-top-p">Top P:</label>
+          <input type="number" id="xml-top-p" min="0" max="1" step="0.1" value="1" class="number-input">
+        </div>
+        <div class="option-group">
+          <label for="xml-max-tokens">Max Tokens:</label>
+          <input type="number" id="xml-max-tokens" min="1" step="1" class="number-input">
+        </div>
+      </div>
+      <div class="option-row">
+        <div class="option-group checkbox-group">
+          <input type="checkbox" id="xml-safe-mode">
+          <label for="xml-safe-mode">Safe Mode</label>
+        </div>
+        <div class="option-group">
+          <label for="xml-random-seed">Random Seed:</label>
+          <input type="number" id="xml-random-seed" min="0" step="1" class="number-input">
+        </div>
+      </div>
+    </div>
+    
+    <div id="xml-result" class="result-box">
+      <h3>Raw Response:</h3>
+      <div id="xml-raw" class="result-raw"></div>
+      <h3>Cleaned Response:</h3>
+      <div id="xml-output" class="result-clean"></div>
+    </div>
+  </div>
+  
+  <div class="test-section">
+    <h2>SQL Formatter</h2>
+    <div class="controls">
+      <label for="sql-prompt">Prompt:</label>
+      <textarea id="sql-prompt">Create a query to find all users who registered in the last month</textarea>
+    </div>
+    <div class="controls">
+      <label for="sql-model">Model:</label>
+      <select id="sql-model">
+        <option value="mistral-tiny">mistral-tiny</option>
+        <option value="mistral-small" selected>mistral-small</option>
+        <option value="mistral-medium">mistral-medium</option>
+        <option value="mistral-large">mistral-large</option>
+      </select>
+      <label for="sql-dialect">SQL Dialect:</label>
+      <select id="sql-dialect">
+        <option value="MySQL">MySQL</option>
+        <option value="PostgreSQL">PostgreSQL</option>
+        <option value="SQL Server">SQL Server</option>
+        <option value="Oracle">Oracle</option>
+        <option value="SQLite">SQLite</option>
+        <option value="MariaDB">MariaDB</option>
+        <option value="BigQuery">BigQuery</option>
+        <option value="Snowflake">Snowflake</option>
+        <option value="Redshift">Redshift</option>
+      </select>
+      <button id="sql-options-toggle" class="toggle-options">Advanced Options</button>
+      <button id="sql-button">Generate SQL</button>
+    </div>
+    
+    <div id="sql-advanced-options" class="advanced-options">
+      <div class="option-row">
+        <div class="option-group">
+          <label for="sql-temperature">Temperature:</label>
+          <input type="number" id="sql-temperature" min="0" max="1" step="0.1" value="0.7" class="number-input">
+        </div>
+        <div class="option-group">
+          <label for="sql-top-p">Top P:</label>
+          <input type="number" id="sql-top-p" min="0" max="1" step="0.1" value="1" class="number-input">
+        </div>
+        <div class="option-group">
+          <label for="sql-max-tokens">Max Tokens:</label>
+          <input type="number" id="sql-max-tokens" min="1" step="1" class="number-input">
+        </div>
+      </div>
+      <div class="option-row">
+        <div class="option-group checkbox-group">
+          <input type="checkbox" id="sql-safe-mode">
+          <label for="sql-safe-mode">Safe Mode</label>
+        </div>
+        <div class="option-group">
+          <label for="sql-random-seed">Random Seed:</label>
+          <input type="number" id="sql-random-seed" min="0" step="1" class="number-input">
+        </div>
+      </div>
+    </div>
+    
+    <div id="sql-result" class="result-box">
+      <h3>Raw Response:</h3>
+      <div id="sql-raw" class="result-raw"></div>
+      <h3>Cleaned Response:</h3>
+      <div id="sql-output" class="result-clean"></div>
+    </div>
+  </div>
+  
+  <div class="test-section">
+    <h2>JSON Formatter</h2>
+    <div class="controls">
+      <label for="json-prompt">Prompt:</label>
+      <textarea id="json-prompt">Generate information for a user named John Doe</textarea>
+    </div>
+    <div class="controls">
+      <label for="json-model">Model:</label>
+      <select id="json-model">
+        <option value="mistral-tiny" selected>mistral-tiny</option>
+        <option value="mistral-small">mistral-small</option>
+        <option value="mistral-medium">mistral-medium</option>
+        <option value="mistral-large">mistral-large</option>
+      </select>
+      <button id="json-options-toggle" class="toggle-options">Advanced Options</button>
+      <button id="json-button">Generate JSON</button>
+    </div>
+    
+    <div id="json-advanced-options" class="advanced-options">
+      <div class="option-row">
+        <div class="option-group">
+          <label for="json-temperature">Temperature:</label>
+          <input type="number" id="json-temperature" min="0" max="1" step="0.1" value="0.7" class="number-input">
+        </div>
+        <div class="option-group">
+          <label for="json-top-p">Top P:</label>
+          <input type="number" id="json-top-p" min="0" max="1" step="0.1" value="1" class="number-input">
+        </div>
+        <div class="option-group">
+          <label for="json-max-tokens">Max Tokens:</label>
+          <input type="number" id="json-max-tokens" min="1" step="1" class="number-input">
+        </div>
+      </div>
+      <div class="option-row">
+        <div class="option-group checkbox-group">
+          <input type="checkbox" id="json-safe-mode">
+          <label for="json-safe-mode">Safe Mode</label>
+        </div>
+        <div class="option-group">
+          <label for="json-random-seed">Random Seed:</label>
+          <input type="number" id="json-random-seed" min="0" step="1" class="number-input">
+        </div>
+      </div>
+      <div class="option-row">
+        <div class="option-group">
+          <label for="json-schema">JSON Schema (optional):</label>
+          <textarea id="json-schema" rows="4" placeholder='{
+  "type": "object",
+  "properties": {
+    "name": { "type": "string" },
+    "age": { "type": "number" }
+  }
+}'></textarea>
+        </div>
+      </div>
+    </div>
+    
+    <div id="json-result" class="result-box">
+      <h3>Raw Response:</h3>
+      <div id="json-raw" class="result-raw"></div>
+      <h3>Cleaned Response:</h3>
+      <div id="json-output" class="result-clean"></div>
+    </div>
+  </div>
+
+  <script src="../dist/mistral-format.min.js"></script>
+  <script src="js/script.js"></script>
+</body>
+</html> 

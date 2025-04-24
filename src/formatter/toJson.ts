@@ -19,6 +19,29 @@ export interface JsonOptions {
 }
 
 /**
+ * Clean JSON response by removing extra backticks and code fence markers
+ * @param text Raw response from AI
+ * @returns Cleaned JSON string
+ */
+function cleanJsonResponse(text: string): string {
+	if (!text) return '{}';
+	
+	// Remove JSON code fence if present
+	let cleaned = text;
+	
+	// Remove leading/trailing ```json fences
+	cleaned = cleaned.replace(/^```(?:json)?\s*/i, '');
+	cleaned = cleaned.replace(/\s*```\s*$/, '');
+	
+	// If still surrounded by plain backtick fences, remove them too
+	if (cleaned.startsWith('`') && cleaned.endsWith('`')) {
+		cleaned = cleaned.replace(/^`+/, '').replace(/`+$/, '');
+	}
+	
+	return cleaned.trim();
+}
+
+/**
  * Generate a response in JSON format
  * @param prompt The user's prompt
  * @param options Generation options
@@ -33,16 +56,19 @@ export async function toJson<T = any>(
 		
 		// If typeSchema is provided, use it
 		if (typeSchema) {
-			return await sendJsonPrompt<T>(prompt, typeSchema, model, requestOptions);
+			const response = await sendJsonPrompt<T>(prompt, typeSchema, model, requestOptions);
+			return response; // Already parsed by sendJsonPrompt
 		}
 		
 		// Otherwise use schema or typeDefinition
-		return await sendJsonPromptWithSchema<T>(
+		const jsonResponse = await sendJsonPromptWithSchema<T>(
 			prompt, 
 			schema, 
 			model, 
 			requestOptions,
 			typeDefinition
 		);
+		
+		return jsonResponse; // Already parsed by sendJsonPromptWithSchema
 	}, "Failed to parse JSON response");
 }
