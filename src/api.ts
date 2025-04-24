@@ -1,4 +1,4 @@
-import { getApiKey } from './config';
+import { getApiKey, getApiVersion } from './config';
 import { APIError, AuthError, safeExecute } from './errors';
 import {
   MistralModel,
@@ -8,25 +8,36 @@ import {
   ResponseFormat,
   SqlResponseOptions
 } from './types';
+import { IApiClient } from './interfaces/IApiClient';
 
 /**
- * Base API URLs
+ * Build the API base URL with the configured version
+ * @param apiVersion - API version
+ * @returns The base API URL
  */
-const API_BASE_URL = "https://api.mistral.ai/v1";
-const CHAT_COMPLETIONS_URL = `${API_BASE_URL}/chat/completions`;
+function buildApiBaseUrl(apiVersion: string): string {
+  return `https://api.mistral.ai/${apiVersion}`;
+}
 
 /**
  * Mistral API Client
+ * Implements the IApiClient interface
  */
-export class MistralApi {
-  private apiKey: string;
+export class MistralApi implements IApiClient {
+  private readonly apiKey: string;
+  private readonly apiBaseUrl: string;
+  private readonly chatCompletionsUrl: string;
 
   /**
    * Creates a new Mistral API client instance
    * @param apiKey - Optional API key (will use config if not provided)
+   * @param apiVersion - Optional API version (will use config if not provided)
    */
-  constructor(apiKey?: string) {
-    this.apiKey = apiKey || getApiKey();
+  constructor(apiKey?: string, apiVersion?: string) {
+    this.apiKey = apiKey ?? getApiKey();
+    const version = apiVersion ?? getApiVersion();
+    this.apiBaseUrl = buildApiBaseUrl(version);
+    this.chatCompletionsUrl = `${this.apiBaseUrl}/chat/completions`;
   }
 
   /**
@@ -40,7 +51,7 @@ export class MistralApi {
         throw new AuthError();
       }
 
-      const res = await fetch(CHAT_COMPLETIONS_URL, {
+      const res = await fetch(this.chatCompletionsUrl, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${this.apiKey}`,
@@ -59,7 +70,7 @@ export class MistralApi {
 
       const json = await res.json();
       
-      if (!json.choices || !json.choices.length) {
+      if (!json.choices.length) {
         throw new APIError("Invalid API response: missing choices", res.status, json);
       }
       
@@ -97,17 +108,21 @@ export class MistralApi {
    * @param schema - Optional JSON schema object
    * @param model - Mistral model to use
    * @param options - Additional options
+   * @param typeDefinition - Optional TypeScript type definition as a string
    * @returns The parsed JSON object
    */
   async generateJson<T = any>(
     prompt: string,
     schema?: object,
     model: MistralModel = "mistral-medium",
-    options: Partial<ChatCompletionOptions> = {}
+    options: Partial<ChatCompletionOptions> = {},
+    typeDefinition?: string
   ): Promise<T> {
-    let fullPrompt = prompt;
+    let fullPrompt: string;
     
-    if (schema) {
+    if (typeDefinition) {
+      fullPrompt = `${prompt}\n\nPlease respond with a properly formatted JSON object that matches this TypeScript type:\n\`\`\`typescript\n${typeDefinition}\n\`\`\``;
+    } else if (schema) {
       fullPrompt = `${prompt}\n\nPlease respond with a properly formatted JSON object that follows this schema: ${JSON.stringify(schema)}`;
     } else {
       fullPrompt = `${prompt}\n\nPlease respond with a valid, well-formatted JSON object only.`;
@@ -130,7 +145,7 @@ export class MistralApi {
     } catch (error) {
       // Extract JSON from the response if needed
       const jsonMatch = content.match(/(\{.*\})/s);
-      if (jsonMatch && jsonMatch[0]) {
+      if (jsonMatch?.[0]) {
         return JSON.parse(jsonMatch[0]) as T;
       }
       throw error;

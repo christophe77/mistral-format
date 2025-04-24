@@ -29,6 +29,9 @@ const { init } = require('mistral-connector');
 
 // Initialize with your API key
 init('your-api-key-here');
+
+// You can also specify the API version (default is 'v1')
+init('your-api-key-here', 'v2');
 ```
 
 This is especially useful for:
@@ -36,6 +39,7 @@ This is especially useful for:
 - Dynamic API key management
 - Environments where `.env` files aren't practical
 - Browser applications where you might get the key from a secure backend
+- Testing against different API versions
 
 ## Usage
 
@@ -149,9 +153,9 @@ The `SQLDatabaseType` enum supports the following database types:
 #### JSON (with typing)
 
 ```javascript
-const { toJson } = require('mistral-connector');
+const { toJson, JsonOptions } = require('mistral-connector');
 
-// Define a type schema
+// Example 1: Using a class schema
 class UserType {
 	constructor() {
 		this.name = '';
@@ -160,14 +164,56 @@ class UserType {
 	}
 }
 
-// With specific model
-const userInfo = await toJson(
-	'Generate info for user John Doe',
-	UserType,
-	'mistral-small',
-);
+// With options object pattern
+const userInfo = await toJson('Generate info for user John Doe', {
+	typeSchema: UserType,
+	model: 'mistral-small',
+});
 console.log(userInfo); // Typed object with name, age, and email
+
+// Example 2: Using a TypeScript type definition (as string)
+const typeDefinition = `
+interface User {
+  name: string;
+  age: number;
+  email: string;
+  isActive: boolean;
+  skills: string[];
+}`;
+
+const developerInfo = await toJson(
+	'Generate info for an active software developer',
+	{
+		typeDefinition: typeDefinition,
+		model: 'mistral-medium',
+	},
+);
+console.log(developerInfo);
+
+// Example 3: Using a JSON schema object
+const schema = {
+	type: 'object',
+	properties: {
+		name: { type: 'string' },
+		age: { type: 'number' },
+		email: { type: 'string' },
+	},
+};
+
+const schemaUserInfo = await toJson('Generate info for user Jane Smith', {
+	schema: schema,
+	model: 'mistral-tiny',
+});
+console.log(schemaUserInfo);
 ```
+
+The `JsonOptions` interface supports the following properties:
+
+- `typeSchema` - Class constructor for the expected response type
+- `typeDefinition` - TypeScript type definition as a string
+- `schema` - JSON schema object
+- `model` - Mistral AI model to use
+- `options` - Additional request options like temperature, top_p, etc.
 
 ### Error Handling
 

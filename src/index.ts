@@ -14,7 +14,7 @@ import {
 import { init } from './config';
 
 // Import formatters
-import { toJson } from './formatter/toJson';
+import { toJson, JsonOptions } from './formatter/toJson';
 import { toMarkdown } from './formatter/toMarkdown';
 import { toXml } from './formatter/toXml';
 import { toSQL, SQLDatabaseType } from './formatter/toSQL';
@@ -58,6 +58,7 @@ export {
   
   // Formatters
   toJson,
+  JsonOptions,
   toMarkdown,
   toXml,
   toSQL,
