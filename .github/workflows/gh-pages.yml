@@ -44,6 +44,12 @@ jobs:
           cp -r playground/* ./tmp_site/
           # Create dist directory and copy JS library file
           mkdir -p ./tmp_site/dist
+          # Ensure the library file exists
+          if [ ! -f "dist/mistral-format.min.js" ]; then
+            echo "Error: dist/mistral-format.min.js does not exist!"
+            exit 1
+          fi
+          # Copy the library file
           cp dist/mistral-format.min.js ./tmp_site/dist/
           # Debug - list files to verify everything's in place
           echo "Contents of tmp_site:"
