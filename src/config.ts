@@ -6,14 +6,14 @@ dotenv.config();
 interface ConfigStore {
   apiKey: string | null;
   setApiKeyFn: ((key: string) => void) | null;
-  version: string;
+  apiVersion: string;
 }
 
 // Configuration store for Mistral Format
 const configStore: ConfigStore = {
   apiKey: process.env.MISTRAL_API_KEY || null,
   setApiKeyFn: null,
-  version: '0.1.0',
+  apiVersion: 'v1',
 };
 
 /**
@@ -25,6 +25,14 @@ export function setApiKey(apiKey: string): void {
   if (configStore.setApiKeyFn) {
     configStore.setApiKeyFn(apiKey);
   }
+}
+
+/**
+ * Set the API version for Mistral API
+ * @param version - The API version to set
+ */
+export function setApiVersion(version: string): void {
+  configStore.apiVersion = version;
 }
 
 /**
@@ -44,9 +52,28 @@ export function getApiKey(): string | null {
 }
 
 /**
+ * Get the current API version
+ * @returns The current API version
+ */
+export function getApiVersion(): string {
+  return configStore.apiVersion;
+}
+
+/**
  * Get the current version of the library
  * @returns The current version
  */
 export function getVersion(): string {
-  return configStore.version;
+  return '1.0.5'; // Should match package.json version
+}
+
+/**
+ * Get the version information including both library and API versions
+ * @returns Object containing library and API versions
+ */
+export function getVersionInfo(): { libraryVersion: string; apiVersion: string } {
+  return {
+    libraryVersion: getVersion(),
+    apiVersion: getApiVersion(),
+  };
 }

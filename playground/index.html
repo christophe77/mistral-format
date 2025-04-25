@@ -7,8 +7,11 @@
     <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body>
-    <h1>Mistral Format - Playground</h1>
-    <p>This page demonstrates the formatters available in the Mistral Format library.</p>
+    <header>
+      <h1>Mistral Format - Playground</h1>
+      <p>This page demonstrates the formatters available in the Mistral Format library.</p>
+      <div class="version-info">v1.0.5</div>
+    </header>
 
     <div class="api-key-section">
       <h2>API Key</h2>
@@ -248,15 +251,15 @@ Create a query to find all users who registered in the last month</textarea
         </select>
         <label for="sql-dialect">SQL Dialect:</label>
         <select id="sql-dialect">
-          <option value="MySQL">MySQL</option>
-          <option value="PostgreSQL">PostgreSQL</option>
-          <option value="SQL Server">SQL Server</option>
-          <option value="Oracle">Oracle</option>
-          <option value="SQLite">SQLite</option>
-          <option value="MariaDB">MariaDB</option>
-          <option value="BigQuery">BigQuery</option>
-          <option value="Snowflake">Snowflake</option>
-          <option value="Redshift">Redshift</option>
+          <option value="MYSQL">MySQL</option>
+          <option value="POSTGRESQL">PostgreSQL</option>
+          <option value="SQLSERVER">SQL Server</option>
+          <option value="ORACLE">Oracle</option>
+          <option value="SQLITE">SQLite</option>
+          <option value="MARIADB">MariaDB</option>
+          <option value="BIGQUERY">BigQuery</option>
+          <option value="SNOWFLAKE">Snowflake</option>
+          <option value="REDSHIFT">Redshift</option>
         </select>
         <button id="sql-options-toggle" class="toggle-options">Advanced Options</button>
         <button id="sql-button">Generate SQL</button>
@@ -317,14 +320,16 @@ Create a query to find all users who registered in the last month</textarea
       <h2>JSON Formatter</h2>
       <div class="controls">
         <label for="json-prompt">Prompt:</label>
-        <textarea id="json-prompt">Generate information for a user named John Doe</textarea>
+        <textarea id="json-prompt">
+Generate information for a user named John Doe who is a software developer</textarea
+        >
       </div>
       <div class="controls">
         <label for="json-model">Model:</label>
         <select id="json-model">
-          <option value="mistral-tiny" selected>mistral-tiny</option>
+          <option value="mistral-tiny">mistral-tiny</option>
           <option value="mistral-small">mistral-small</option>
-          <option value="mistral-medium">mistral-medium</option>
+          <option value="mistral-medium" selected>mistral-medium</option>
           <option value="mistral-large">mistral-large</option>
         </select>
         <button id="json-options-toggle" class="toggle-options">Advanced Options</button>
@@ -372,20 +377,21 @@ Create a query to find all users who registered in the last month</textarea
             <input type="number" id="json-random-seed" min="0" step="1" class="number-input" />
           </div>
         </div>
-        <div class="option-row">
-          <div class="option-group">
-            <label for="json-schema">JSON Schema (optional):</label>
+        <div class="option-row full-width">
+          <div class="option-group full-width">
+            <label for="json-schema">Schema or TypeScript Type (optional):</label>
             <textarea
               id="json-schema"
-              rows="4"
-              placeholder='{
-  "type": "object",
-  "properties": {
-    "name": { "type": "string" },
-    "age": { "type": "number" }
-  }
-}'
-            ></textarea>
+              placeholder="Enter JSON schema or TypeScript type definition"
+            >
+interface User {
+  name: string;
+  age: number;
+  email: string;
+  profession: string;
+  skills: string[];
+}</textarea
+            >
           </div>
         </div>
       </div>
@@ -398,7 +404,16 @@ Create a query to find all users who registered in the last month</textarea
       </div>
     </div>
 
+    <footer>
+      <p>
+        Mistral Format v1.0.5 - <a href="https://github.com/christophe77/mistral-format">GitHub</a>
+      </p>
+    </footer>
+
+    <!-- Load the library first -->
     <script src="dist/mistral-format.min.js"></script>
-    <script src="js/script.js"></script>
+
+    <!-- Load modules using ES modules -->
+    <script type="module" src="js/app.js"></script>
   </body>
 </html>

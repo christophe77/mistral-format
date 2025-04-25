@@ -2,6 +2,8 @@
 
 This folder contains the tests for the Mistral AI client library.
 
+> **Note:** The playground has been moved to the `/playground` directory at the root of the project.
+
 ## Test Structure
 
 The tests are organized by functionality:

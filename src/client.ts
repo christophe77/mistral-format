@@ -1,5 +1,5 @@
 import { MistralApi } from './api';
-import { getVersion, onApiKeyChange } from './config';
+import { getApiVersion, onApiKeyChange } from './config';
 import { SQLDatabaseType } from './formatter/toSQL';
 import { MistralModel, ChatCompletionOptions } from './types';
 
@@ -21,8 +21,8 @@ export function getApi(): MistralApi {
  * Used by config module
  */
 export function setApiKey(apiKey: string): void {
-  // Create a new instance with the updated API key and current version
-  apiInstance = new MistralApi(apiKey, getVersion());
+  // Create a new instance with the updated API key and current API version
+  apiInstance = new MistralApi(apiKey, getApiVersion());
 }
 
 // Register the setApiKey function with the config module

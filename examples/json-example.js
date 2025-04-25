@@ -3,9 +3,9 @@ const { init, toJson } = require('../dist');
 
 async function main() {
   try {
-    // Initialize with API key
+    // Initialize with API key and explicitly set to API version v1
     const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY || "your-api-key-here";
-    init(MISTRAL_API_KEY);
+    init(MISTRAL_API_KEY, 'v1'); // Explicitly specify v1 API version
 
     // Define a type schema for JSON formatting
     const UserType = {

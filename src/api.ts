@@ -1,16 +1,7 @@
-import { getApiKey, getVersion } from './config';
+import { getApiKey, getApiVersion } from './config';
 import { APIError, AuthError, safeExecute } from './errors';
 import { IApiClient } from './interfaces/IApiClient';
 import { ChatCompletionOptions, ChatCompletionResponse, MistralModel } from './types';
-
-/**
- * Build the API base URL with the configured version
- * @param apiVersion - API version
- * @returns The base API URL
- */
-function buildApiBaseUrl(apiVersion: string): string {
-  return `https://api.mistral.ai/${apiVersion}`;
-}
 
 /**
  * Mistral API Client
@@ -18,7 +9,7 @@ function buildApiBaseUrl(apiVersion: string): string {
  */
 export class MistralApi implements IApiClient {
   private readonly apiKey: string;
-  private readonly apiBaseUrl: string;
+  public readonly apiBaseUrl: string;
   private readonly chatCompletionsUrl: string;
 
   /**
@@ -29,9 +20,13 @@ export class MistralApi implements IApiClient {
   constructor(apiKey?: string, apiVersion?: string) {
     const configApiKey = getApiKey();
     this.apiKey = apiKey ?? (configApiKey || '');
-    const version = apiVersion ?? getVersion();
-    this.apiBaseUrl = buildApiBaseUrl(version);
-    this.chatCompletionsUrl = `${this.apiBaseUrl}/chat/completions`;
+    const version = apiVersion ?? getApiVersion();
+
+    // Set base URL according to Mistral API docs
+    this.apiBaseUrl = 'https://api.mistral.ai';
+
+    // The exact API endpoint format from official Mistral docs
+    this.chatCompletionsUrl = `${this.apiBaseUrl}/${version}/chat/completions`;
   }
 
   /**

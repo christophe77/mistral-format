@@ -4,20 +4,20 @@ A simple and powerful TypeScript library for interacting with the Mistral AI API
 
 ## Features
 
-- 🚀 **Simple, Promise-based API** - Easy to use with async/await
-- 🔄 **Multiple Response Formats** - JSON, Markdown, XML, SQL, and raw text
-- 🧠 **Advanced Type Support** - TypeScript interfaces and schema validation
-- 🌐 **Cross-Platform** - Works in both Node.js and browser environments
-- 🧩 **Modular Design** - Import only what you need
-- 🔒 **Error Handling** - Comprehensive error types and safe execution
-- 🛠️ **Configurable** - Customize with options objects
-- 🧹 **Auto-Cleaning** - Automatically removes code fences and formatting artifacts
+- **Simple, Promise-based API** - Easy to use with async/await
+- **Multiple Response Formats** - JSON, Markdown, XML, SQL, and raw text
+- **Advanced Type Support** - TypeScript interfaces and schema validation
+- **Cross-Platform** - Works in both Node.js and browser environments
+- **Modular Design** - Import only what you need
+- **Error Handling** - Comprehensive error types and safe execution
+- **Configurable** - Customize with options objects
+- **Auto-Cleaning** - Automatically removes code fences and formatting artifacts
 
 ## Live Playground
 
 Try Mistral Format directly in your browser with our interactive playground:
 
-[**🚀 Launch the Mistral Format Playground**](https://christophe77.github.io/mistral-format/)
+[**Launch the Mistral Format Playground**](https://christophe77.github.io/mistral-format/)
 
 The playground allows you to:
 
@@ -28,11 +28,70 @@ The playground allows you to:
 
 You'll need your own Mistral API key to use the playground.
 
+Want to run the playground locally? Check out the [playground directory](./playground).
+
 ## Installation
 
 ```bash
 npm install mistral-format
 ```
+
+## Importing the Library
+
+### In Node.js (CommonJS)
+```javascript
+// Import specific functions
+const { init, sendPrompt, toJson } = require('mistral-format');
+
+// Or import everything as a single object
+const MistralFormat = require('mistral-format');
+MistralFormat.init('your-api-key');
+```
+
+### In modern JavaScript/TypeScript environments (ESM)
+```javascript
+// Import specific functions
+import { init, sendPrompt, toJson } from 'mistral-format';
+
+// Or import the default export
+import MistralFormat from 'mistral-format';
+MistralFormat.init('your-api-key');
+```
+
+### In browser environments
+The library is bundled as a UMD module, making the entire API available under the global `MistralFormat` object:
+
+```html
+<script src="path/to/mistral-format.min.js"></script>
+<script>
+  // Access any exported function
+  MistralFormat.init('your-api-key');
+  MistralFormat.sendPrompt('What is the capital of France?')
+    .then(response => console.log(response));
+</script>
+```
+
+## API Configuration & Troubleshooting
+
+This library connects to the official Mistral AI API. To ensure proper functionality:
+
+1. **Endpoint Configuration**: The library uses the standard Mistral AI API endpoint at `https://api.mistral.ai/v1/chat/completions`
+
+2. **API Key**: You must provide a valid API key from [console.mistral.ai](https://console.mistral.ai)
+
+3. **API Version**: The library defaults to API version `v1`, which you can override when initializing
+
+4. **Verification**: Use the provided verification script to test your configuration:
+   ```bash
+   node examples/verify-config.js YOUR_API_KEY
+   ```
+
+5. **Common Issues**:
+   - 401 Unauthorized: Your API key is invalid or has expired
+   - 404 Not Found: The endpoint URL or API version is incorrect
+   - 429 Too Many Requests: You've exceeded your rate limits
+
+6. **Payment Requirements**: To use the Mistral API, you need to have a payment method configured in your Mistral account.
 
 ## Setup
 
@@ -48,7 +107,7 @@ MISTRAL_API_KEY=your_api_key_here
 
 ### Option 2: Initialize programmatically
 
-You can also set your API key programmatically:
+You can set your API key and API version programmatically using the `init()` function:
 
 ```javascript
 const { init } = require('mistral-format');
@@ -57,7 +116,7 @@ const { init } = require('mistral-format');
 init('your-api-key-here');
 
 // You can also specify the API version (default is 'v1')
-init('your-api-key-here', 'v2');
+init('your-api-key-here', 'v1');
 ```
 
 This is especially useful for:

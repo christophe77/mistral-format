@@ -14,7 +14,7 @@ permissions:
 
 # Allow only one concurrent deployment
 concurrency:
-  group: "pages"
+  group: 'pages'
   cancel-in-progress: true
 
 jobs:
@@ -23,25 +23,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm install
-        
+
       - name: Build library
         run: npm run build
-        
+
       - name: Prepare site files
         run: |
           # Create a temporary site directory for Jekyll to process
           mkdir -p ./tmp_site
           # Copy the playground files
-          cp -r tests/playground/* ./tmp_site/
+          cp -r playground/* ./tmp_site/
           # Create dist directory and copy JS library file
           mkdir -p ./tmp_site/dist
           cp dist/mistral-format.min.js ./tmp_site/dist/
@@ -50,21 +50,21 @@ jobs:
           ls -la ./tmp_site
           echo "Contents of tmp_site/dist:"
           ls -la ./tmp_site/dist
-          
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
-        
+
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
           source: ./tmp_site
           destination: ./_site
-          
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: '_site'
-          
+
   deploy:
     environment:
       name: github-pages
@@ -74,4 +74,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4 
+        uses: actions/deploy-pages@v4

@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeEach, afterAll, jest } from '@jest/globals';
+
 import { setApiKey, onApiKeyChange, getApiKey, getVersion } from '../../src/config';
 
 describe('Config Module', () => {
   // Save the original environment
   const originalEnv = process.env;
-  
+
   beforeEach(() => {
     // Reset environment for each test
     jest.resetModules();
@@ -27,11 +28,11 @@ describe('Config Module', () => {
       // Arrange
       const apiKey = 'test-api-key';
       const mockSetApiKey = jest.fn();
-      
+
       // Act
       onApiKeyChange(mockSetApiKey);
       setApiKey(apiKey);
-      
+
       // Assert
       expect(getApiKey()).toBe(apiKey);
       expect(mockSetApiKey).toHaveBeenCalledWith(apiKey);
@@ -43,7 +44,7 @@ describe('Config Module', () => {
       // Arrange
       const apiKey = 'test-api-key';
       setApiKey(apiKey);
-      
+
       // Act & Assert
       expect(getApiKey()).toBe(apiKey);
     });
@@ -54,10 +55,10 @@ describe('Config Module', () => {
         // Arrange
         const envApiKey = 'env-api-key';
         process.env.MISTRAL_API_KEY = envApiKey;
-        
+
         // Re-import the module with the new environment
         const { getApiKey } = require('../../src/config');
-        
+
         // Act & Assert
         expect(getApiKey()).toBe(envApiKey);
       });
@@ -70,10 +71,10 @@ describe('Config Module', () => {
       jest.isolateModules(() => {
         // Arrange - ensure no API key in environment
         delete process.env.MISTRAL_API_KEY;
-        
+
         // Re-import the module with the new environment
         const { getApiKey } = require('../../src/config');
-        
+
         // Act & Assert
         expect(getApiKey()).toBeNull();
       });
@@ -83,7 +84,7 @@ describe('Config Module', () => {
   describe('getVersion()', () => {
     it('should return the library version', () => {
       // Act & Assert
-      expect(getVersion()).toBe('0.1.0');
+      expect(getVersion()).toBe('1.0.5');
     });
   });
-}); 
+});
