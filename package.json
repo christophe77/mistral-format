@@ -12,7 +12,7 @@
     "build": "npm run build:tsc && npm run build:webpack && npm run copy:playground",
     "build:tsc": "tsc",
     "build:webpack": "webpack --config webpack.config.js",
-    "copy:playground": "node -e \"require('fs').copyFileSync('dist/mistral-format.min.js', 'playground/dist/mistral-format.min.js')\"",
+    "copy:playground": "node -e \"const fs = require('fs'); const path = require('path'); const dir = 'playground/dist'; if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true }); fs.copyFileSync('dist/mistral-format.min.js', 'playground/dist/mistral-format.min.js');\"",
     "test": "jest",
     "test:unit": "jest --testPathPattern=tests/unit",
     "test:integration": "jest --testPathPattern=tests/integration",
