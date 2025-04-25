@@ -7,28 +7,23 @@ async function main() {
     const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY || "your-api-key-here";
     init(MISTRAL_API_KEY, 'v1'); // Explicitly specify v1 API version
     
-    console.log("--- Error Handling Examples ---");
-    
     try {
       // Simulate an invalid model error
-      console.log("Testing error handling with invalid model...");
       await sendPrompt("This will fail", "invalid-model");
     } catch (error) {
-      if (error instanceof APIError) {
-        console.log(`✓ Caught API Error - Code: ${error.code}, Status: ${error.statusCode}`);
-        console.log(`  Message: ${error.message}`);
-      } else {
-        console.log(`✓ Caught Error: ${error.message}`);
-      }
+      // Handle API errors
+      return {
+        caught: true,
+        isApiError: error instanceof APIError,
+        message: error.message,
+        code: error instanceof APIError ? error.code : null,
+        statusCode: error instanceof APIError ? error.statusCode : null
+      };
     }
     
-    console.log("Error handling demonstration complete");
+    return { caught: false };
   } catch (error) {
-    if (error instanceof MistralError) {
-      console.error(`Error [${error.code}]:`, error.message);
-    } else {
-      console.error("Unexpected error:", error);
-    }
+    throw error;
   }
 }
 

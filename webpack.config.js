@@ -57,8 +57,9 @@ module.exports = [
         name: 'MistralFormat',
         type: 'umd',
         export: 'default',
+        umdNamedDefine: true
       },
-      globalObject: 'this',
+      globalObject: 'typeof self !== \'undefined\' ? self : this',
     },
   },
   // Minified bundle
@@ -71,8 +72,9 @@ module.exports = [
         name: 'MistralFormat',
         type: 'umd',
         export: 'default',
+        umdNamedDefine: true
       },
-      globalObject: 'this',
+      globalObject: 'typeof self !== \'undefined\' ? self : this',
     },
     optimization: {
       minimize: true,

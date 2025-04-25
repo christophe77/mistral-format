@@ -14,7 +14,7 @@ async function main() {
       email: "";
     }
 
-    console.log("--- JSON Formatter Example (using schema object) ---");
+    // JSON Formatter Example (using schema object)
     const userInfoWithSchema = await toJson(
       "Generate information for a user named John Doe",
       {
@@ -22,9 +22,8 @@ async function main() {
         model: "mistral-tiny"
       }
     );
-    console.log("JSON response with schema (parsed):", userInfoWithSchema);
 
-    console.log("\n--- JSON Formatter Example (using TypeScript type definition) ---");
+    // JSON Formatter Example (using TypeScript type definition)
     // Define a TypeScript type as a string
     const userTypeDefinition = `
     interface User {
@@ -42,9 +41,13 @@ async function main() {
         typeDefinition: userTypeDefinition
       }
     );
-    console.log("JSON response with TypeScript type (parsed):", userInfoWithType);
+    
+    return {
+      userInfoWithSchema,
+      userInfoWithType
+    };
   } catch (error) {
-    console.error("Error:", error.message);
+    throw error;
   }
 }
 

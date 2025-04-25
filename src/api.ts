@@ -76,7 +76,7 @@ export class MistralApi implements IApiClient {
    */
   async generateText(
     prompt: string,
-    model: MistralModel = 'mistral-medium',
+    model: MistralModel = MistralModel.MEDIUM,
     options: Partial<ChatCompletionOptions> = {},
   ): Promise<string> {
     const response = await this.createChatCompletion({
@@ -103,7 +103,7 @@ export class MistralApi implements IApiClient {
   async generateJson<T extends Record<string, unknown>>(
     prompt: string,
     schema?: object,
-    model: MistralModel = 'mistral-medium',
+    model: MistralModel = MistralModel.MEDIUM,
     options: Partial<ChatCompletionOptions> = {},
     typeDefinition?: string,
   ): Promise<T> {
@@ -149,7 +149,7 @@ export class MistralApi implements IApiClient {
    */
   async generateXml(
     prompt: string,
-    model: MistralModel = 'mistral-medium',
+    model: MistralModel = MistralModel.MEDIUM,
     options: Partial<ChatCompletionOptions> = {},
   ): Promise<string> {
     const fullPrompt = `${prompt}\n\nPlease respond with valid, well-formatted XML only.`;
@@ -173,7 +173,7 @@ export class MistralApi implements IApiClient {
    */
   async generateMarkdown(
     prompt: string,
-    model: MistralModel = 'mistral-medium',
+    model: MistralModel = MistralModel.MEDIUM,
     options: Partial<ChatCompletionOptions> = {},
   ): Promise<string> {
     const fullPrompt = `${prompt}\n\nPlease respond with properly formatted Markdown text only.`;
@@ -199,7 +199,7 @@ export class MistralApi implements IApiClient {
   async generateSql(
     prompt: string,
     dialect: string = 'MySQL',
-    model: MistralModel = 'mistral-medium',
+    model: MistralModel = MistralModel.MEDIUM,
     options: Partial<ChatCompletionOptions> = {},
   ): Promise<string> {
     const fullPrompt = `${prompt}\n\nPlease respond with a valid, executable SQL query for ${dialect} database only, no code fences, no explanations.`;

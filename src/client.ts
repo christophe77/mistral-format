@@ -37,7 +37,7 @@ onApiKeyChange(setApiKey);
  */
 export async function sendPrompt(
   prompt: string,
-  model: MistralModel = 'mistral-medium',
+  model: MistralModel = MistralModel.MEDIUM,
   options: Partial<ChatCompletionOptions> = {},
 ): Promise<string> {
   return getApi().generateText(prompt, model, options);
@@ -54,7 +54,7 @@ export async function sendPrompt(
 export async function sendJsonPrompt<T extends Record<string, unknown>>(
   prompt: string,
   schemaClass: new () => T,
-  model: MistralModel = 'mistral-medium',
+  model: MistralModel = MistralModel.MEDIUM,
   options: Partial<ChatCompletionOptions> = {},
 ): Promise<T> {
   const schemaObj = new schemaClass();
@@ -73,7 +73,7 @@ export async function sendJsonPrompt<T extends Record<string, unknown>>(
 export async function sendJsonPromptWithSchema<T extends Record<string, unknown>>(
   prompt: string,
   schema?: object,
-  model: MistralModel = 'mistral-medium',
+  model: MistralModel = MistralModel.MEDIUM,
   options: Partial<ChatCompletionOptions> = {},
   typeDefinition?: string,
 ): Promise<T> {
@@ -89,7 +89,7 @@ export async function sendJsonPromptWithSchema<T extends Record<string, unknown>
  */
 export async function sendXmlPrompt(
   prompt: string,
-  model: MistralModel = 'mistral-medium',
+  model: MistralModel = MistralModel.MEDIUM,
   options: Partial<ChatCompletionOptions> = {},
 ): Promise<string> {
   return getApi().generateXml(prompt, model, options);
@@ -104,7 +104,7 @@ export async function sendXmlPrompt(
  */
 export async function sendMarkdownPrompt(
   prompt: string,
-  model: MistralModel = 'mistral-medium',
+  model: MistralModel = MistralModel.MEDIUM,
   options: Partial<ChatCompletionOptions> = {},
 ): Promise<string> {
   return getApi().generateMarkdown(prompt, model, options);
@@ -121,7 +121,7 @@ export async function sendMarkdownPrompt(
 export async function sendSqlPrompt(
   prompt: string,
   dbType: SQLDatabaseType = SQLDatabaseType.MYSQL,
-  model: MistralModel = 'mistral-medium',
+  model: MistralModel = MistralModel.MEDIUM,
   options: Partial<ChatCompletionOptions> = {},
 ): Promise<string> {
   return getApi().generateSql(prompt, dbType, model, options);

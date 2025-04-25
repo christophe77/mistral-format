@@ -16,6 +16,4 @@ document.addEventListener('DOMContentLoaded', function () {
   
   // Setup event listeners
   setupEventListeners(elements);
-  
-  console.log('Mistral Format Playground initialized successfully');
 }); 
