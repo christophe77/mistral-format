@@ -7,11 +7,11 @@ async function main() {
     const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY || "your-api-key-here";
     init(MISTRAL_API_KEY, 'v1'); // Explicitly specify v1 API version
     
-    console.log("--- Markdown Formatter Example ---");
+    // Markdown Formatter Example
     const markdownResponse = await toMarkdown("Write a short guide about artificial intelligence");
-    console.log("Markdown response:", markdownResponse);
+    return markdownResponse;
   } catch (error) {
-    console.error("Error:", error.message);
+    throw error;
   }
 }
 

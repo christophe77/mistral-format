@@ -3,7 +3,13 @@
  */
 
 // Models supported by Mistral AI
-export type MistralModel = 'mistral-tiny' | 'mistral-small' | 'mistral-medium' | 'mistral-large';
+// Source: https://docs.mistral.ai/getting-started/models/models_overview/
+export enum MistralModel {
+  TINY = 'mistral-tiny',
+  SMALL = 'mistral-small',
+  MEDIUM = 'mistral-medium',
+  LARGE = 'mistral-large',
+}
 
 // Role of a message in a conversation
 export type MessageRole = 'user' | 'assistant' | 'system';

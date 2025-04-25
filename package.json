@@ -9,9 +9,10 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "npm run build:tsc && npm run build:webpack",
+    "build": "npm run build:tsc && npm run build:webpack && npm run copy:playground",
     "build:tsc": "tsc",
     "build:webpack": "webpack --config webpack.config.js",
+    "copy:playground": "node -e \"require('fs').copyFileSync('dist/mistral-format.min.js', 'playground/dist/mistral-format.min.js')\"",
     "test": "jest",
     "test:unit": "jest --testPathPattern=tests/unit",
     "test:integration": "jest --testPathPattern=tests/integration",
