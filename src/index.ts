@@ -17,6 +17,14 @@ import { toMarkdown, MarkdownOptions } from './formatter/toMarkdown';
 import { toSQL, SQLDatabaseType, SQLOptions } from './formatter/toSQL';
 import { toXml, XmlOptions } from './formatter/toXml';
 import {
+  RateLimiter,
+  RateLimiterOptions,
+  getRateLimiter,
+  configureRateLimiter,
+  RateLimitExceededError,
+  DEFAULT_RATE_LIMITER_OPTIONS,
+} from './rate-limiter';
+import {
   MistralModel,
   Message,
   MessageRole,
@@ -36,9 +44,9 @@ export function init(apiKey: string, version: string = 'v1'): void {
   setApiVersion(version);
 }
 
-// Export everything individually for ESM/CommonJS
+// Export everything
 export {
-  // Main client
+  // Main functions
   sendPrompt,
   sendJsonPrompt,
   sendJsonPromptWithSchema,
@@ -66,12 +74,6 @@ export {
   SQLOptions,
   SQLDatabaseType,
 
-  // Error handling
-  MistralError,
-  APIError,
-  ParseError,
-  AuthError,
-
   // Types
   MistralModel,
   Message,
@@ -80,6 +82,20 @@ export {
   ChatCompletionOptions,
   ResponseFormat,
   ApiRequestOptions,
+
+  // Error handling
+  MistralError,
+  APIError,
+  ParseError,
+  AuthError,
+
+  // Rate limiting
+  RateLimiter,
+  RateLimiterOptions,
+  getRateLimiter,
+  configureRateLimiter,
+  RateLimitExceededError,
+  DEFAULT_RATE_LIMITER_OPTIONS,
 };
 
 // Default export for CommonJS/UMD compatibility
@@ -114,6 +130,12 @@ interface MistralFormatExport {
   APIError: typeof APIError;
   ParseError: typeof ParseError;
   AuthError: typeof AuthError;
+
+  // Rate limiting
+  RateLimiter: typeof RateLimiter;
+  getRateLimiter: typeof getRateLimiter;
+  configureRateLimiter: typeof configureRateLimiter;
+  RateLimitExceededError: typeof RateLimitExceededError;
 }
 
 const MistralFormat: MistralFormatExport = {
@@ -147,6 +169,12 @@ const MistralFormat: MistralFormatExport = {
   APIError,
   ParseError,
   AuthError,
+
+  // Rate limiting
+  RateLimiter,
+  getRateLimiter,
+  configureRateLimiter,
+  RateLimitExceededError,
 };
 
 export default MistralFormat;

@@ -376,6 +376,88 @@ async function main() {
 - `APIError` - Error related to API calls (includes status code and response)
 - `ParseError` - Error related to parsing responses (includes original content)
 - `AuthError` - Error related to authentication (missing or invalid API key)
+- `RateLimitExceededError` - Error when rate limit retries are exhausted
+
+## Rate Limiting
+
+The package includes a built-in rate limiter to prevent 429 (Too Many Requests) errors when making API calls to Mistral. The rate limiter automatically:
+
+1. Limits the number of requests per minute
+2. Implements exponential backoff for retries when rate limits are hit
+3. Queues requests when needed to maintain rate limits
+
+### Basic Usage
+
+The rate limiter is enabled by default, so you don't need to do anything special to use it:
+
+```javascript
+const { init, sendPrompt } = require('mistral-format');
+
+async function main() {
+  // Initialize the library
+  init('your-api-key');
+  
+  // Send multiple requests in parallel
+  // The rate limiter will handle throttling automatically
+  const promises = [];
+  for (let i = 0; i < 10; i++) {
+    promises.push(sendPrompt(`Question ${i}: What is the capital of France?`));
+  }
+  
+  // Wait for all requests to complete
+  const results = await Promise.all(promises);
+  console.log('All requests completed successfully!');
+}
+```
+
+### Custom Configuration
+
+You can customize the rate limiter behavior:
+
+```javascript
+const { init, configureRateLimiter } = require('mistral-format');
+
+// Initialize the library
+init('your-api-key');
+
+// Configure the rate limiter with custom settings
+configureRateLimiter({
+  maxRequestsPerMinute: 30,  // Default: 60
+  maxRetries: 3,             // Default: 5
+  initialBackoff: 1000,      // Default: 1000 (1 second)
+  maxBackoff: 30000,         // Default: 60000 (1 minute)
+  backoffMultiplier: 2       // Default: 2
+});
+```
+
+### Advanced Usage
+
+For advanced use cases, you can access the rate limiter directly:
+
+```javascript
+const { RateLimiter, getRateLimiter } = require('mistral-format');
+
+// Get the global rate limiter instance
+const limiter = getRateLimiter();
+
+// Execute a function with rate limiting
+const result = await limiter.execute(async () => {
+  // This function will be rate-limited and retried if needed
+  const response = await fetch('https://api.example.com/data');
+  return response.json();
+});
+
+// Or wrap a function with rate limiting
+const originalFunction = async (param1, param2) => {
+  // Some async operation
+  return result;
+};
+
+const rateLimitedFunction = RateLimiter.wrap(originalFunction, limiter);
+
+// Now use the rate-limited version
+const result = await rateLimitedFunction('value1', 'value2');
+```
 
 ## Browser Usage
 

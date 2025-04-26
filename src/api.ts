@@ -1,6 +1,7 @@
 import { getApiKey, getApiVersion } from './config';
 import { APIError, AuthError, safeExecute } from './errors';
 import { IApiClient } from './interfaces/IApiClient';
+import { getRateLimiter } from './rate-limiter';
 import { ChatCompletionOptions, ChatCompletionResponse, MistralModel } from './types';
 
 /**
@@ -11,16 +12,19 @@ export class MistralApi implements IApiClient {
   private readonly apiKey: string;
   public readonly apiBaseUrl: string;
   private readonly chatCompletionsUrl: string;
+  private useRateLimiter: boolean;
 
   /**
    * Creates a new Mistral API client instance
    * @param apiKey - Optional API key (will use config if not provided)
    * @param apiVersion - Optional API version (will use config if not provided)
+   * @param useRateLimiter - Whether to use rate limiting (default: true)
    */
-  constructor(apiKey?: string, apiVersion?: string) {
+  constructor(apiKey?: string, apiVersion?: string, useRateLimiter: boolean = true) {
     const configApiKey = getApiKey();
     this.apiKey = apiKey ?? (configApiKey || '');
     const version = apiVersion ?? getApiVersion();
+    this.useRateLimiter = useRateLimiter;
 
     // Set base URL according to Mistral API docs
     this.apiBaseUrl = 'https://api.mistral.ai';
@@ -35,7 +39,7 @@ export class MistralApi implements IApiClient {
    * @returns Chat completion response
    */
   async createChatCompletion(options: ChatCompletionOptions): Promise<ChatCompletionResponse> {
-    return safeExecute(async () => {
+    const makeRequest = async () => {
       if (!this.apiKey) {
         throw new AuthError();
       }
@@ -64,6 +68,15 @@ export class MistralApi implements IApiClient {
       }
 
       return json;
+    };
+
+    // Use the rate limiter or direct call
+    return safeExecute(async () => {
+      if (this.useRateLimiter) {
+        return await getRateLimiter().execute(makeRequest);
+      } else {
+        return await makeRequest();
+      }
     }, 'Failed to get response from Mistral AI API');
   }
 

@@ -1,4 +1,7 @@
 // Example of error handling
+// To run this example:
+// 1. Set your Mistral API key as an environment variable: export MISTRAL_API_KEY=your_key_here
+// 2. Run with: node examples/error-handling.js
 const { init, sendPrompt, MistralError, APIError } = require('../dist');
 
 async function main() {
@@ -9,9 +12,13 @@ async function main() {
     
     try {
       // Simulate an invalid model error
+      console.log("Testing error handling with invalid model...");
       await sendPrompt("This will fail", "invalid-model");
     } catch (error) {
       // Handle API errors
+      console.log(`Caught Error - Type: ${error instanceof APIError ? 'APIError' : 'Other'}`);
+      console.log(`Message: ${error.message}`);
+      
       return {
         caught: true,
         isApiError: error instanceof APIError,
@@ -23,8 +30,19 @@ async function main() {
     
     return { caught: false };
   } catch (error) {
+    console.error("Unexpected error:", error.message);
     throw error;
   }
 }
 
-main(); 
+// When run directly, execute the main function
+if (require.main === module) {
+  main()
+    .then(result => console.log("Result:", JSON.stringify(result, null, 2)))
+    .catch(err => {
+      process.exit(1);
+    });
+} else {
+  // When imported as a module, just export the function
+  module.exports = main;
+} 
