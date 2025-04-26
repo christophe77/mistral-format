@@ -7,7 +7,7 @@ const { init, toMarkdown } = require('../dist');
 async function main() {
   try {
     // Initialize with API key and explicitly set to API version v1
-    const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY || "QPXqzc2zupz8YsqqUQJLbF9eDSjAx0AL";
+    const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY || "your-api-key-here";
     init(MISTRAL_API_KEY, 'v1'); // Explicitly specify v1 API version
     
     console.log("Running Markdown formatter example...");
