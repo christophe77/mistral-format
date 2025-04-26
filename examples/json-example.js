@@ -7,30 +7,60 @@ const { init, toJson } = require('../dist');
 async function main() {
   try {
     // Initialize with API key and explicitly set to API version v1
-    const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY || "your-api-key-here";
+    const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY || "QPXqzc2zupz8YsqqUQJLbF9eDSjAx0AL";
     init(MISTRAL_API_KEY, 'v1'); // Explicitly specify v1 API version
 
-    // Define a type schema for JSON formatting
-    const UserType = {
-      name: "";
-      age: 0;
-      email: "";
+    console.log("Running JSON formatter example with class schema...");
+    // Example 1: Using a class schema
+    class UserType {
+      constructor() {
+        this.name = '';
+        this.age = 0;
+        this.email = '';
+      }
     }
 
-    console.log("Running JSON formatter example with schema object...");
-    // JSON Formatter Example (using schema object)
-    const userInfoWithSchema = await toJson(
-      "Generate information for a user named John Doe",
-      {
-        typeSchema: UserType,
-        model: "mistral-tiny"
+    let userInfoWithClassSchema;
+    try {
+      userInfoWithClassSchema = await toJson(
+        "Generate information for a user named John Doe who is 45 years old",
+        {
+          typeSchema: UserType,
+          model: "mistral-small"
+        }
+      );
+      console.log("JSON response with class schema:", userInfoWithClassSchema);
+    } catch (error) {
+      console.error("Class schema example error:", error);
+    }
+
+    console.log("\nRunning JSON formatter example with JSON schema...");
+    // Example 2: Using a JSON schema object
+    const userSchema = {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        age: { type: 'number' },
+        email: { type: 'string' }
       }
-    );
-    console.log("JSON response with schema:", JSON.stringify(userInfoWithSchema, null, 2));
+    };
+
+    let userInfoWithSchema;
+    try {
+      userInfoWithSchema = await toJson(
+        "Generate information for a user named Mark Wilson who is 38 years old",
+        {
+          schema: userSchema,
+          model: "mistral-small"
+        }
+      );
+      console.log("JSON response with schema:", userInfoWithSchema);
+    } catch (error) {
+      console.error("Schema example error:", error);
+    }
 
     console.log("\nRunning JSON formatter example with TypeScript type definition...");
-    // JSON Formatter Example (using TypeScript type definition)
-    // Define a TypeScript type as a string
+    // Example 3: Using a TypeScript type definition
     const userTypeDefinition = `
     interface User {
       name: string;
@@ -40,30 +70,37 @@ async function main() {
       skills: string[];
     }`;
 
-    const userInfoWithType = await toJson(
-      "Generate information for a user named Jane Smith who is an active software developer",
-      {
-        model: "mistral-tiny",
-        typeDefinition: userTypeDefinition
-      }
-    );
-    console.log("JSON response with TypeScript type:", JSON.stringify(userInfoWithType, null, 2));
+    let userInfoWithType;
+    try {
+      userInfoWithType = await toJson(
+        "Generate information for a user named Jane Smith who is an active software developer",
+        {
+          model: "mistral-tiny",
+          typeDefinition: userTypeDefinition
+        }
+      );
+      console.log("JSON response with TypeScript type:", JSON.stringify(userInfoWithType, null, 2));
+    } catch (error) {
+      console.error("Type definition example error:", error);
+    }
     
     return {
+      userInfoWithClassSchema,
       userInfoWithSchema,
       userInfoWithType
     };
+    
   } catch (error) {
     console.error("Error:", error.message);
     if (error.status) console.error("Status Code:", error.status);
     if (error.response) console.error("API Response:", error.response.text);
-    throw error;
   }
 }
 
 // When run directly, execute the main function
 if (require.main === module) {
   main().catch(err => {
+    console.error("Unhandled error:", err);
     process.exit(1);
   });
 } else {
