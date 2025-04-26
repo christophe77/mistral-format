@@ -99,7 +99,11 @@ export class RateLimiter {
                 // Increase backoff for next attempt
                 backoff = backoff * this.options.backoffMultiplier;
 
-                await new Promise(resolve => setTimeout(resolve, waitTime));
+                await new Promise<void>(resolveTimeout => {
+                  setTimeout(() => {
+                    resolveTimeout();
+                  }, waitTime);
+                });
               } else {
                 // For other errors, just pass them through
                 throw error;
@@ -116,7 +120,7 @@ export class RateLimiter {
 
       // Start processing the queue if not already processing
       if (!this.processingQueue) {
-        this.processQueue();
+        void this.processQueue();
       }
     });
   }
@@ -150,7 +154,11 @@ export class RateLimiter {
       const timeToWait = 60000 - (now - oldestTimestamp);
 
       if (timeToWait > 0) {
-        await new Promise(resolve => setTimeout(resolve, timeToWait));
+        await new Promise<void>(resolveTimeout => {
+          setTimeout(() => {
+            resolveTimeout();
+          }, timeToWait);
+        });
       }
     }
   }
@@ -175,7 +183,7 @@ export class RateLimiter {
     }
 
     // Process next item in the queue
-    this.processQueue();
+    void this.processQueue();
   }
 
   /**
