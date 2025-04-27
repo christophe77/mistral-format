@@ -13,38 +13,6 @@ const envKeys = Object.keys(env).reduce((prev, next) => {
   return prev;
 }, {});
 
-// Node.js build configuration
-const nodeConfig = {
-  entry: './src/index.ts',
-  mode: 'production',
-  target: 'node',
-  module: {
-    rules: [
-      {
-        test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/,
-      },
-    ],
-  },
-  resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
-  },
-  output: {
-    filename: 'index.js',
-    path: path.resolve(__dirname, 'dist/node'),
-    library: {
-      type: 'commonjs2',
-    },
-  },
-  externals: {
-    'dotenv': 'commonjs dotenv',
-  },
-  plugins: [
-    new webpack.DefinePlugin(envKeys),
-  ],
-};
-
 // Browser build configuration
 const browserConfig = {
   entry: './src/browser.ts',
@@ -88,20 +56,16 @@ const browserConfig = {
       Buffer: ['buffer', 'Buffer'],
       process: 'process/browser',
     }),
-    // Uncomment this line to generate bundle analysis report
-    // new BundleAnalyzerPlugin(),
+    // Bundle analyzer to help identify large dependencies
+    new BundleAnalyzerPlugin({
+      analyzerMode: 'static',
+      openAnalyzer: false,
+      reportFilename: 'bundle-report.html'
+    }),
   ],
+  // Disable code splitting for browser build
   optimization: {
-    splitChunks: {
-      chunks: 'all',
-      cacheGroups: {
-        vendor: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
-          chunks: 'all',
-        },
-      },
-    },
+    splitChunks: false,
   },
 };
 
@@ -129,8 +93,4 @@ const minifiedBrowserConfig = {
   },
 };
 
-// Update package.json to point to the correct files
-// main: dist/node/index.js
-// browser: dist/browser/mistral-format.min.js
-
-module.exports = [nodeConfig, browserConfig, minifiedBrowserConfig]; 
+module.exports = [browserConfig, minifiedBrowserConfig]; 

@@ -1,7 +1,12 @@
-import dotenv from 'dotenv';
+// Import package.json for version information
+import packageJson from '../package.json';
+const { version } = packageJson;
 
-// Initialize dotenv to load environment variables
-dotenv.config();
+// Initialize dotenv only in Node.js environment
+if (typeof process !== 'undefined' && process.env) {
+  // Dynamic import for dotenv to reduce bundle size in browsers
+  void import('dotenv').then(dotenv => dotenv.config());
+}
 
 interface ConfigStore {
   apiKey: string | null;
@@ -11,7 +16,7 @@ interface ConfigStore {
 
 // Configuration store for Mistral Format
 const configStore: ConfigStore = {
-  apiKey: process.env.MISTRAL_API_KEY || null,
+  apiKey: (typeof process !== 'undefined' && process.env && process.env.MISTRAL_API_KEY) || null,
   setApiKeyFn: null,
   apiVersion: 'v1',
 };
@@ -64,7 +69,7 @@ export function getApiVersion(): string {
  * @returns The current version
  */
 export function getVersion(): string {
-  return '1.0.5'; // Should match package.json version
+  return version; // Read from package.json
 }
 
 /**
