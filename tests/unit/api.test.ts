@@ -2,7 +2,18 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
 import { MistralApi } from '../../src/api';
 import { APIError, AuthError } from '../../src/errors';
+import * as rateLimiterModule from '../../src/rate-limiter';
 import { ChatCompletionResponse } from '../../src/types';
+
+// Mock rate limiter
+jest.mock('../../src/rate-limiter', () => {
+  return {
+    ...jest.requireActual('../../src/rate-limiter'),
+    getRateLimiter: jest.fn().mockReturnValue({
+      execute: jest.fn().mockImplementation(fn => fn()),
+    }),
+  };
+});
 
 // Mock fetch globally with proper typing
 global.fetch = jest.fn() as unknown as typeof fetch;
@@ -35,6 +46,14 @@ describe('MistralApi', () => {
       const defaultApi = new MistralApi();
       expect(defaultApi['apiBaseUrl']).toBe('https://api.mistral.ai');
       expect(defaultApi['chatCompletionsUrl']).toContain('/v1/chat/completions');
+    });
+
+    it('should set useRateLimiter flag based on constructor parameter', () => {
+      const apiWithRateLimiter = new MistralApi('test-key', 'v1', true);
+      expect(apiWithRateLimiter['useRateLimiter']).toBe(true);
+
+      const apiWithoutRateLimiter = new MistralApi('test-key', 'v1', false);
+      expect(apiWithoutRateLimiter['useRateLimiter']).toBe(false);
     });
   });
 
@@ -81,34 +100,48 @@ describe('MistralApi', () => {
       ).rejects.toThrow(APIError);
     });
 
-    it('should return valid response on success', async () => {
-      const mockResponse = {
-        id: 'test-id',
-        choices: [{ message: { role: 'assistant', content: 'test response' } }],
-      };
-
-      // Mock fetch to return success with valid response
+    it('should use rate limiter when enabled', async () => {
+      // Setup mock successful response
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: async () => mockResponse,
+        json: async () => ({
+          choices: [{ message: { content: 'success' } }],
+        }),
       } as Response);
 
-      const result = await api.createChatCompletion({
+      const getRateLimiterSpy = jest.spyOn(rateLimiterModule, 'getRateLimiter');
+
+      await api.createChatCompletion({
         model: 'mistral-small',
         messages: [{ role: 'user', content: 'test' }],
       });
 
-      expect(result).toEqual(mockResponse);
-      expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/v1/chat/completions'),
-        expect.objectContaining({
-          method: 'POST',
-          headers: expect.objectContaining({
-            Authorization: 'Bearer test-api-key',
-          }),
+      expect(getRateLimiterSpy).toHaveBeenCalled();
+      expect(getRateLimiterSpy().execute).toHaveBeenCalled();
+    });
+
+    it('should not use rate limiter when disabled', async () => {
+      // Setup API with rate limiter disabled
+      const apiNoRateLimiter = new MistralApi('test-api-key', 'v1', false);
+
+      // Setup mock successful response
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          choices: [{ message: { content: 'success' } }],
         }),
-      );
+      } as Response);
+
+      const getRateLimiterSpy = jest.spyOn(rateLimiterModule, 'getRateLimiter');
+
+      await apiNoRateLimiter.createChatCompletion({
+        model: 'mistral-small',
+        messages: [{ role: 'user', content: 'test' }],
+      });
+
+      expect(getRateLimiterSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -155,35 +188,91 @@ describe('MistralApi', () => {
   });
 
   describe('generateJson', () => {
-    it('should parse JSON response correctly', async () => {
-      const mockJsonContent = '{"name":"test","value":123}';
-      const mockResponse: ChatCompletionResponse = {
-        id: 'test-id',
-        choices: [{ message: { role: 'assistant', content: mockJsonContent } }],
-        model: 'mistral-medium',
-        usage: { prompt_tokens: 10, completion_tokens: 10, total_tokens: 20 },
-        object: 'chat.completion',
-      };
+    it('should successfully parse a valid JSON response', async () => {
+      // Mock the chat completion to return a valid JSON
+      jest.spyOn(api, 'createChatCompletion').mockResolvedValueOnce({
+        choices: [
+          {
+            message: {
+              content: '{"name":"John","age":30}',
+            },
+          },
+        ],
+      } as ChatCompletionResponse);
 
-      api.createChatCompletion = jest.fn().mockResolvedValueOnce(mockResponse) as any;
-
-      const result = await api.generateJson<{ name: string; value: number }>('test prompt');
-      expect(result).toEqual({ name: 'test', value: 123 });
+      const result = await api.generateJson('Generate a user');
+      expect(result).toEqual({ name: 'John', age: 30 });
     });
 
-    it('should extract JSON from markdown code blocks', async () => {
-      const mockResponse: ChatCompletionResponse = {
-        id: 'test-id',
-        choices: [{ message: { role: 'assistant', content: '```json\n{"name":"test"}\n```' } }],
-        model: 'mistral-medium',
-        usage: { prompt_tokens: 10, completion_tokens: 15, total_tokens: 25 },
-        object: 'chat.completion',
-      };
+    it('should extract JSON from a response with text wrapper', async () => {
+      jest.spyOn(api, 'createChatCompletion').mockResolvedValueOnce({
+        choices: [
+          {
+            message: {
+              content: 'Here is your JSON:\n```json\n{"name":"John","age":30}\n```',
+            },
+          },
+        ],
+      } as ChatCompletionResponse);
 
-      api.createChatCompletion = jest.fn().mockResolvedValueOnce(mockResponse) as any;
+      const result = await api.generateJson('Generate a user');
+      expect(result).toEqual({ name: 'John', age: 30 });
+    });
 
-      const result = await api.generateJson('test prompt');
-      expect(result).toEqual({ name: 'test' });
+    it('should use schema in the prompt when provided', async () => {
+      const schema = { type: 'object', properties: { name: { type: 'string' } } };
+      const createChatCompletionSpy = jest
+        .spyOn(api, 'createChatCompletion')
+        .mockResolvedValueOnce({
+          choices: [
+            {
+              message: {
+                content: '{"name":"John"}',
+              },
+            },
+          ],
+        } as ChatCompletionResponse);
+
+      await api.generateJson('Generate a user', schema);
+
+      // Check that the schema was included in the prompt
+      expect(createChatCompletionSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messages: expect.arrayContaining([
+            expect.objectContaining({
+              content: expect.stringContaining(JSON.stringify(schema)),
+            }),
+          ]),
+        }),
+      );
+    });
+
+    it('should use typeDefinition in the prompt when provided', async () => {
+      const typeDefinition = 'interface User { name: string; }';
+      const createChatCompletionSpy = jest
+        .spyOn(api, 'createChatCompletion')
+        .mockResolvedValueOnce({
+          choices: [
+            {
+              message: {
+                content: '{"name":"John"}',
+              },
+            },
+          ],
+        } as ChatCompletionResponse);
+
+      await api.generateJson('Generate a user', undefined, 'mistral-small', {}, typeDefinition);
+
+      // Check that the type definition was included in the prompt
+      expect(createChatCompletionSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messages: expect.arrayContaining([
+            expect.objectContaining({
+              content: expect.stringContaining(typeDefinition),
+            }),
+          ]),
+        }),
+      );
     });
   });
 

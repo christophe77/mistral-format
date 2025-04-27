@@ -2,6 +2,35 @@
 
 All notable changes to the `mistral-format` package will be documented in this file.
 
+## [1.0.7] - 2024-12-05
+
+### Added
+- Improved browser compatibility with conditional dotenv loading
+- Added browser-specific entry point for better bundle optimization
+- Created separate webpack configurations for Node.js and browser environments
+- Added bundle analyzer for identifying large dependencies
+
+### Fixed
+- Fixed package.json import warning in webpack builds
+- Reduced bundle size by optimizing imports for browser environments
+- Updated TypeScript configuration to use NodeNext module resolution
+- Fixed bundling conflicts by restructuring output directories
+
+## [1.0.6] - 2024-11-30
+
+### Added
+- Implemented automatic rate limiting system to prevent 429 errors
+- Added configurable retry mechanism with exponential backoff
+- Added new `configureRateLimiter()` function for customizing rate limits
+- Added `RateLimiter` class for advanced rate limiting control
+- New example: `examples/rate-limiter-example.js`
+
+### Improved
+- Enhanced test coverage across all modules
+- Optimized API request handling with queuing mechanism
+- Better error handling for rate limit exceeded scenarios
+- Updated README with rate limiting documentation
+
 ## [1.0.5] - 2024-11-25
 
 ### Fixed

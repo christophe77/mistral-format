@@ -189,7 +189,7 @@ export class MistralApi implements IApiClient {
     model: MistralModel = MistralModel.MEDIUM,
     options: Partial<ChatCompletionOptions> = {},
   ): Promise<string> {
-    const fullPrompt = `${prompt}\n\nPlease respond with properly formatted Markdown text only.`;
+    const fullPrompt = `${prompt}\n\nPlease respond with properly formatted Markdown text only. `;
 
     const response = await this.createChatCompletion({
       model,
